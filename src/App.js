@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ShoppingCart, User, Menu, Facebook, Instagram, Twitter, Youtube, ArrowLeft, Plus, Minus, Trash2, X, Heart, ClipboardList, LogIn, LogOut, Settings } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, Facebook, Instagram, Twitter, Youtube, ArrowLeft, Plus, Minus, Trash2, X, Heart, ClipboardList, LogIn, LogOut, Settings, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // --- MOCK DATA (Initial Data) ---
 const mockProductsInitial = [
@@ -9,6 +9,7 @@ const mockProductsInitial = [
         category: "Men's Outerwear",
         price: 129.00,
         stock: 10, // Added stock
+        isOnSale: true, // Added for sale carousel
         imageUrls: [
             'https://placehold.co/600x750/d4a373/fefae0?text=Urban+Jacket+1',
             'https://placehold.co/600x750/d4a373/fefae0?text=Urban+Jacket+2',
@@ -22,6 +23,7 @@ const mockProductsInitial = [
         category: "Women's Dresses",
         price: 89.00,
         stock: 3, // Low stock
+        isOnSale: false, // Not on sale
         imageUrls: [
             'https://placehold.co/600x750/e9c46a/2a9d8f?text=Flowy+Dress+1',
             'https://placehold.co/600x750/e9c46a/2a9d8f?text=Flowy+Dress+2',
@@ -35,6 +37,7 @@ const mockProductsInitial = [
         category: 'Accessories',
         price: 159.00,
         stock: 0, // Out of stock
+        isOnSale: true, // On sale even if out of stock, for demonstration of warning
         imageUrls: [
             'https://placehold.co/600x750/2a9d8f/e9c46a?text=Leather+Backpack+1',
             'https://placehold.co/600x750/2a9d8f/e9c46a?text=Leather+Backpack+2',
@@ -48,12 +51,41 @@ const mockProductsInitial = [
         category: 'Unisex',
         price: 39.00,
         stock: 7, // In stock
+        isOnSale: true, // On sale
         imageUrls: [
             'https://placehold.co/600x750/f4a261/264653?text=Classic+Tee+1',
             'https://placehold.co/600x750/f4a261/264653?text=Classic+Tee+2',
             'https://placehold.co/600x750/f4a261/264653?text=Classic+Tee+3'
         ],
         description: 'Made from 100% premium cotton, this t-shirt offers unparalleled comfort and a timeless look.'
+    },
+    {
+        id: 5,
+        name: 'Cozy Knit Sweater',
+        category: "Women's Knitwear",
+        price: 75.00,
+        stock: 5,
+        isOnSale: true,
+        imageUrls: [
+            'https://placehold.co/600x750/b4a373/fefae0?text=Sweater+1',
+            'https://placehold.co/600x750/b4a373/fefae0?text=Sweater+2',
+            'https://placehold.co/600x750/b4a373/fefae0?text=Sweater+3'
+        ],
+        description: 'Soft and warm, perfect for chilly evenings.'
+    },
+    {
+        id: 6,
+        name: 'Denim Jeans',
+        category: "Men's Bottoms",
+        price: 99.00,
+        stock: 12,
+        isOnSale: false,
+        imageUrls: [
+            'https://placehold.co/600x750/8a9b8a/344e41?text=Jeans+1',
+            'https://placehold.co/600x750/8a9b8a/344e41?text=Jeans+2',
+            'https://placehold.co/600x750/8a9b8a/344e41?text=Jeans+3'
+        ],
+        description: 'Classic fit denim jeans, durable and stylish.'
     },
 ];
 
@@ -428,10 +460,10 @@ const Footer = ({ onNavigate }) => {
  * @param {function} props.onNavigate - Function to handle navigation to the product detail page.
  */
 const ProductCard = ({ product, onNavigate }) => (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden group">
-        <div className="relative">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden group h-full flex flex-col"> {/* Added h-full and flex-col for consistent height */}
+        <div className="relative flex-grow"> {/* flex-grow to make image section fill space */}
             {/* Product Image - uses the first image from the imageUrls array */}
-            <img src={product.imageUrls[0]} alt={product.name} className="w-full h-auto object-cover group-hover:opacity-80 transition-opacity duration-300" onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/400x500/cccccc/333333?text=Image+Not+Found"; }}/>
+            <img src={product.imageUrls[0]} alt={product.name} className="w-full h-full object-cover group-hover:opacity-80 transition-opacity duration-300" onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/400x500/cccccc/333333?text=Image+Not+Found"; }}/>
             {/* Quick View Overlay */}
             <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button onClick={() => onNavigate('product', { productId: product.id })} className="px-6 py-2 bg-white text-black font-semibold rounded-md">Quick View</button>
@@ -452,57 +484,163 @@ const ProductCard = ({ product, onNavigate }) => (
  * @param {function} props.onNavigate - Function to handle page navigation.
  * @param {Array<object>} props.products - The current list of available products.
  */
-const HomePage = ({ onNavigate, products }) => (
-    <>
-        {/* Hero Section */}
-        <section className="relative h-[60vh] md:h-[80vh] bg-cover bg-center text-white rounded-b-lg overflow-hidden" style={{ backgroundImage: "url('https://placehold.co/1800x900/a3b18a/344e41?text=Raiwear+Collection')" }}>
-            <div className="absolute inset-0 bg-black/40"></div>
-            <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold">Elegance in Motion</h1>
-                <p className="mt-4 max-w-xl text-lg md:text-xl text-gray-200">Discover our new collection, crafted with passion and designed for the modern individual.</p>
-                <a onClick={() => onNavigate('shop')} className="mt-8 px-8 py-3 bg-white text-gray-900 font-semibold rounded-lg shadow-md hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 cursor-pointer">Shop The New Collection</a>
-            </div>
-        </section>
+const HomePage = ({ onNavigate, products }) => {
+    const saleProducts = products.filter(p => p.isOnSale);
+    const [currentSaleIndex, setCurrentSaleIndex] = useState(0);
 
-        {/* Featured Products Section */}
-        <section className="py-16 sm:py-24">
-            <div className="container mx-auto px-4 lg:px-8">
-                <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">Featured Products</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {/* Display first 4 products, or fewer if not enough */}
-                    {products.slice(0, 4).map(product => <ProductCard key={product.id} product={product} onNavigate={onNavigate} />)}
+    // Function to determine how many items to show based on screen width
+    const getItemsToShow = () => {
+        if (window.innerWidth >= 1280) { // xl breakpoint
+            return 4;
+        } else if (window.innerWidth >= 1024) { // lg breakpoint
+            return 3;
+        } else if (window.innerWidth >= 768) { // md breakpoint
+            return 2;
+        } else { // default, sm and below
+            return 1;
+        }
+    };
+
+    const [itemsToShow, setItemsToShow] = useState(getItemsToShow());
+
+    useEffect(() => {
+        const handleResize = () => {
+            setItemsToShow(getItemsToShow());
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Calculate total number of slides needed
+    const totalSlides = Math.ceil(saleProducts.length / itemsToShow);
+
+    // Ensure current index is valid if itemsToShow changes (e.g., on resize)
+    useEffect(() => {
+        if (currentSaleIndex >= totalSlides && totalSlides > 0) {
+            setCurrentSaleIndex(0); // Reset index if it becomes out of bounds
+        }
+    }, [itemsToShow, totalSlides, currentSaleIndex]);
+
+    const nextSlide = () => {
+        setCurrentSaleIndex((prevIndex) => (prevIndex + 1) % totalSlides);
+    };
+
+    const prevSlide = () => {
+        setCurrentSaleIndex((prevIndex) => (prevIndex - 1 + totalSlides) % totalSlides);
+    };
+
+    // Automatic carousel sliding
+    useEffect(() => {
+        let interval;
+        // Only auto-slide if there are actually more "slides" than can be shown at once
+        if (saleProducts.length > itemsToShow) {
+            interval = setInterval(() => {
+                nextSlide();
+            }, 5000); // Change slide every 5 seconds
+        }
+        return () => clearInterval(interval); // Clear interval on component unmount
+    }, [saleProducts, itemsToShow, totalSlides, nextSlide]); // Dependencies for auto-slide
+
+    return (
+        <>
+            {/* Hero Section */}
+            <section className="relative h-[60vh] md:h-[80vh] bg-cover bg-center text-white rounded-b-lg overflow-hidden" style={{ backgroundImage: "url('https://placehold.co/1800x900/a3b18a/344e41?text=Raiwear+Collection')" }}>
+                <div className="absolute inset-0 bg-black/40"></div>
+                <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold">Elegance in Motion</h1>
+                    <p className="mt-4 max-w-xl text-lg md:text-xl text-gray-200">Discover our new collection, crafted with passion and designed for the modern individual.</p>
+                    <a onClick={() => onNavigate('shop')} className="mt-8 px-8 py-3 bg-white text-gray-900 font-semibold rounded-lg shadow-md hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 cursor-pointer">Shop The New Collection</a>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        {/* Shop by Category Section */}
-        <section className="py-16 sm:py-24 bg-white">
-            <div className="container mx-auto px-4 lg:px-8">
-                <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">Shop by Category</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {categories.map(category => (
-                        <a key={category.name} onClick={() => onNavigate('shop')} className="relative rounded-lg overflow-hidden h-96 block group cursor-pointer">
-                            <img src={category.imageUrl} alt={`${category.name} Collection`} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/600x800/cccccc/333333?text=Image+Not+Found"; }}/>
-                            <div className="absolute inset-0 bg-black/40"></div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <h3 className="text-4xl font-bold text-white">{category.name}</h3>
+            {/* Products on Sale Carousel Section */}
+            {saleProducts.length > 0 && (
+                <section className="py-16 sm:py-24 bg-gray-100">
+                    <div className="container mx-auto px-4 lg:px-8">
+                        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">Products on Sale</h2>
+                        <div className="relative">
+                            <div className="overflow-hidden rounded-lg shadow-xl">
+                                <div
+                                    className="flex transition-transform duration-500 ease-in-out"
+                                    // Shift by percentage of total width based on current slide index and items visible per slide
+                                    style={{ transform: `translateX(-${currentSaleIndex * (100 / itemsToShow)}%)`, width: `${(saleProducts.length / itemsToShow) * 100}%` }} // Set total width of inner container
+                                >
+                                    {saleProducts.map((product) => (
+                                        <div
+                                            key={product.id}
+                                            // Define width of each product card within the carousel
+                                            // This ensures responsiveness for the items themselves
+                                            className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/4 p-2" // Added p-2 for spacing
+                                        >
+                                            <ProductCard product={product} onNavigate={onNavigate} />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </a>
-                    ))}
-                </div>
-            </div>
-        </section>
+                            {/* Navigation Arrows */}
+                            {totalSlides > 1 && ( // Only show arrows if there's more than one "slide"
+                                <>
+                                    <button
+                                        onClick={prevSlide}
+                                        className="absolute top-1/2 left-0 -translate-y-1/2 bg-white bg-opacity-75 p-2 rounded-full shadow-lg z-10 hover:bg-opacity-100 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        aria-label="Previous slide"
+                                    >
+                                        <ChevronLeft size={24} />
+                                    </button>
+                                    <button
+                                        onClick={nextSlide}
+                                        className="absolute top-1/2 right-0 -translate-y-1/2 bg-white bg-opacity-75 p-2 rounded-full shadow-lg z-10 hover:bg-opacity-100 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        aria-label="Next slide"
+                                    >
+                                        <ChevronRight size={24} />
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </section>
+            )}
 
-        {/* Sale Call to Action Section */}
-        <section className="bg-indigo-700 text-white">
-            <div className="container mx-auto px-4 lg:px-8 py-16 text-center">
-                <h2 className="text-4xl font-bold">Mid-Season Sale</h2>
-                <p className="mt-2 text-lg text-indigo-200">Up to <span className="text-3xl font-bold text-yellow-300">40% OFF</span> on selected items.</p>
-                <button onClick={() => onNavigate('shop')} className="mt-6 inline-block px-8 py-3 bg-white text-indigo-700 font-semibold rounded-lg shadow-md hover:bg-gray-200 transition-colors duration-300">Shop Sale</button>
-            </div>
-        </section>
-    </>
-);
+            {/* Featured Products Section */}
+            <section className="py-16 sm:py-24">
+                <div className="container mx-auto px-4 lg:px-8">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">Featured Products</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {/* Display first 4 products, or fewer if not enough */}
+                        {products.slice(0, 4).map(product => <ProductCard key={product.id} product={product} onNavigate={onNavigate} />)}
+                    </div>
+                </div>
+            </section>
+
+            {/* Shop by Category Section */}
+            <section className="py-16 sm:py-24 bg-white">
+                <div className="container mx-auto px-4 lg:px-8">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">Shop by Category</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {categories.map(category => (
+                            <a key={category.name} onClick={() => onNavigate('shop')} className="relative rounded-lg overflow-hidden h-96 block group cursor-pointer">
+                                <img src={category.imageUrl} alt={`${category.name} Collection`} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/600x800/cccccc/333333?text=Image+Not+Found"; }}/>
+                                <div className="absolute inset-0 bg-black/40"></div>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <h3 className="text-4xl font-bold text-white">{category.name}</h3>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Sale Call to Action Section */}
+            <section className="bg-indigo-700 text-white">
+                <div className="container mx-auto px-4 lg:px-8 py-16 text-center">
+                    <h2 className="text-4xl font-bold">Mid-Season Sale</h2>
+                    <p className="mt-2 text-lg text-indigo-200">Up to <span className="text-3xl font-bold text-yellow-300">40% OFF</span> on selected items.</p>
+                    <button onClick={() => onNavigate('shop')} className="mt-6 inline-block px-8 py-3 bg-white text-indigo-700 font-semibold rounded-lg shadow-md hover:bg-gray-200 transition-colors duration-300">Shop Sale</button>
+                </div>
+            </section>
+        </>
+    );
+};
 
 /**
  * A container component for pages, providing a consistent layout with a title and back button.
@@ -739,7 +877,7 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemoveFromCart, cartTotal, on
                             <span>Total</span>
                             <span>R{cartTotal.toFixed(2)}</span>
                         </div>
-                        <button className="w-full mt-6 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700">Proceed to Checkout</button>
+                        <button onClick={() => onNavigate('checkout')} className="w-full mt-6 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700">Proceed to Checkout</button>
                     </div>
                 </div>
             </div>
@@ -940,10 +1078,11 @@ const LoginPage = ({ onLogin, onNavigate, setNotification }) => {
  * Renders the admin page where new products can be added.
  * @param {object} props - Component props.
  * @param {function} props.onNavigate - Function to handle page navigation.
- * @param {function} props.onAddProduct - Function to add a new product.
+ * @param {function} props.onAddProduct - Function to add a single new product.
+ * @param {function} props.onAddProductsBulk - Function to add multiple new products (bulk).
  * @param {function} props.setNotification - Function to set global notification message.
  */
-const AdminPage = ({ onNavigate, onAddProduct, setNotification }) => {
+const AdminPage = ({ onNavigate, onAddProduct, onAddProductsBulk, setNotification }) => {
     const [name, setName] = useState('');
     const [category, setCategory] = useState('');
     const [price, setPrice] = useState('');
@@ -953,7 +1092,9 @@ const AdminPage = ({ onNavigate, onAddProduct, setNotification }) => {
     const [imageUrl2, setImageUrl2] = useState('');
     const [imageUrl3, setImageUrl3] = useState('');
 
-    const handleSubmit = (e) => {
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const handleSingleProductSubmit = (e) => {
         e.preventDefault();
         // Basic validation
         if (!name || !category || !price || !stock || !description || !imageUrl1) {
@@ -970,16 +1111,17 @@ const AdminPage = ({ onNavigate, onAddProduct, setNotification }) => {
         }
 
         const newProduct = {
-            id: Math.max(...mockProductsInitial.map(p => p.id), 0) + 1, // Simple ID generation
+            // ID will be generated in App.js to ensure uniqueness
             name,
             category,
             price: parseFloat(price),
             stock: parseInt(stock),
             imageUrls: [imageUrl1, imageUrl2, imageUrl3].filter(url => url), // Filter out empty URLs
-            description
+            description,
+            isOnSale: false, // Default to not on sale when adding manually
         };
 
-        onAddProduct(newProduct);
+        onAddProduct(newProduct); // Call the single product add function
         setNotification(`Product "${name}" added successfully!`);
 
         // Clear form
@@ -993,52 +1135,206 @@ const AdminPage = ({ onNavigate, onAddProduct, setNotification }) => {
         setImageUrl3('');
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file && (file.type === 'text/csv' || file.name.endsWith('.csv'))) {
+            setSelectedFile(file);
+        } else {
+            setSelectedFile(null);
+            setNotification('Please select a valid CSV file.');
+        }
+    };
+
+    const handleDownloadTemplate = () => {
+        const csvContent = "data:text/csv;charset=utf-8,name,category,price,stock,description,imageUrl1,imageUrl2,imageUrl3,isOnSale\n" +
+                           "New T-Shirt,Unisex,29.99,50,A comfy cotton t-shirt.,https://placehold.co/600x750/f4a261/264653?text=New+Tee+1,,,TRUE\n" +
+                           "Sport Shorts,Men's Activewear,45.00,30,Breathable shorts for your workout.,https://placehold.co/600x750/e9c46a/2a9d8f?text=Sport+Shorts+1,,,FALSE\n";
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "product_template.csv");
+        document.body.appendChild(link); // Required for Firefox
+        link.click();
+        document.body.removeChild(link);
+        setNotification("Product template downloaded!");
+    };
+
+    const handleBulkUpload = () => {
+        if (!selectedFile) {
+            setNotification('Please select a CSV file to upload.');
+            return;
+        }
+
+        // Simulate file reading and parsing
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target.result;
+            // Simplified CSV parsing: split by newline, then by comma.
+            // In a real app, use a robust CSV parser (e.g., PapaParse).
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            if (lines.length <= 1) { // Only header or empty
+                setNotification('The uploaded CSV file is empty or contains only headers.');
+                return;
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim());
+            const bulkProducts = [];
+            let errorCount = 0;
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                if (values.length !== headers.length) {
+                    console.error(`Skipping malformed row ${i + 1}: ${lines[i]}`);
+                    errorCount++;
+                    continue;
+                }
+
+                try {
+                    const product = {
+                        name: values[headers.indexOf('name')],
+                        category: values[headers.indexOf('category')],
+                        price: parseFloat(values[headers.indexOf('price')]),
+                        stock: parseInt(values[headers.indexOf('stock')]),
+                        description: values[headers.indexOf('description')],
+                        imageUrls: [
+                            values[headers.indexOf('imageUrl1')],
+                            values[headers.indexOf('imageUrl2')],
+                            values[headers.indexOf('imageUrl3')]
+                        ].filter(url => url),
+                        // Parse isOnSale as boolean
+                        isOnSale: values[headers.indexOf('isOnSale')]?.toLowerCase() === 'true'
+                    };
+
+                    // Basic validation for parsed data
+                    if (!product.name || !product.category || isNaN(product.price) || product.price <= 0 || isNaN(product.stock) || product.stock < 0 || !product.description || product.imageUrls.length === 0) {
+                        throw new Error('Missing or invalid data in row.');
+                    }
+                    bulkProducts.push(product);
+                } catch (error) {
+                    console.error(`Error parsing row ${i + 1}: ${lines[i]} - ${error.message}`);
+                    errorCount++;
+                }
+            }
+
+            if (bulkProducts.length > 0) {
+                onAddProductsBulk(bulkProducts);
+                setNotification(`Successfully uploaded ${bulkProducts.length} products! ${errorCount > 0 ? `(${errorCount} rows skipped due to errors)` : ''}`);
+            } else if (errorCount === lines.length - 1) { // All data rows had errors
+                setNotification('No products could be uploaded. All rows had errors.');
+            } else {
+                setNotification('No valid products found in the uploaded file.');
+            }
+            setSelectedFile(null); // Clear the file input
+            e.target.value = ''; // Reset the input field
+        };
+
+        reader.onerror = () => {
+            setNotification('Failed to read file.');
+        };
+
+        reader.readAsText(selectedFile);
+    };
+
+
     return (
-        <PageContainer title="Admin Panel: Add New Product" onNavigate={onNavigate}>
-            <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
-                <div className="mb-4">
-                    <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">Product Name:</label>
-                    <input type="text" id="name" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={name} onChange={(e) => setName(e.target.value)} required />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="category" className="block text-gray-700 text-sm font-bold mb-2">Category:</label>
-                    <input type="text" id="category" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={category} onChange={(e) => setCategory(e.target.value)} required />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label htmlFor="price" className="block text-gray-700 text-sm font-bold mb-2">Price (R):</label>
-                        <input type="number" id="price" step="0.01" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={price} onChange={(e) => setPrice(e.target.value)} required />
+        <PageContainer title="Admin Panel" onNavigate={onNavigate}>
+            {/* Single Product Addition */}
+            <div className="mb-12 p-6 bg-gray-50 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold mb-6 text-gray-800">Add Single Product</h2>
+                <form onSubmit={handleSingleProductSubmit} className="max-w-2xl mx-auto">
+                    <div className="mb-4">
+                        <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">Product Name:</label>
+                        <input type="text" id="name" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={name} onChange={(e) => setName(e.target.value)} required />
                     </div>
-                    <div>
-                        <label htmlFor="stock" className="block text-gray-700 text-sm font-bold mb-2">Stock Quantity:</label>
-                        <input type="number" id="stock" step="1" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={stock} onChange={(e) => setStock(e.target.value)} required />
+                    <div className="mb-4">
+                        <label htmlFor="category" className="block text-gray-700 text-sm font-bold mb-2">Category:</label>
+                        <input type="text" id="category" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={category} onChange={(e) => setCategory(e.target.value)} required />
                     </div>
-                </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label htmlFor="price" className="block text-gray-700 text-sm font-bold mb-2">Price (R):</label>
+                            <input type="number" id="price" step="0.01" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={price} onChange={(e) => setPrice(e.target.value)} required />
+                        </div>
+                        <div>
+                            <label htmlFor="stock" className="block text-gray-700 text-sm font-bold mb-2">Stock Quantity:</label>
+                            <input type="number" id="stock" step="1" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={stock} onChange={(e) => setStock(e.target.value)} required />
+                        </div>
+                    </div>
+                    <div className="mb-4">
+                        <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">Description:</label>
+                        <textarea id="description" rows="4" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
+                    </div>
+                    <div className="mb-4">
+                        <label htmlFor="imageUrl1" className="block text-gray-700 text-sm font-bold mb-2">Image URL 1 (Main):</label>
+                        <input type="url" id="imageUrl1" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={imageUrl1} onChange={(e) => setImageUrl1(e.target.value)} required />
+                    </div>
+                    <div className="mb-4">
+                        <label htmlFor="imageUrl2" className="block text-gray-700 text-sm font-bold mb-2">Image URL 2:</label>
+                        <input type="url" id="imageUrl2" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={imageUrl2} onChange={(e) => setImageUrl2(e.target.value)} />
+                    </div>
+                    <div className="mb-6">
+                        <label htmlFor="imageUrl3" className="block text-gray-700 text-sm font-bold mb-2">Image URL 3:</label>
+                        <input type="url" id="imageUrl3" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={imageUrl3} onChange={(e) => setImageUrl3(e.target.value)} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Add Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {/* Bulk Product Upload */}
+            <div className="p-6 bg-gray-50 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold mb-6 text-gray-800">Bulk Product Upload</h2>
                 <div className="mb-4">
-                    <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">Description:</label>
-                    <textarea id="description" rows="4" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={description} onChange={(e) => setDescription(e.target.value)} required></textarea>
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="imageUrl1" className="block text-gray-700 text-sm font-bold mb-2">Image URL 1 (Main):</label>
-                    <input type="url" id="imageUrl1" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={imageUrl1} onChange={(e) => setImageUrl1(e.target.value)} required />
-                </div>
-                <div className="mb-4">
-                    <label htmlFor="imageUrl2" className="block text-gray-700 text-sm font-bold mb-2">Image URL 2:</label>
-                    <input type="url" id="imageUrl2" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={imageUrl2} onChange={(e) => setImageUrl2(e.target.value)} />
-                </div>
-                <div className="mb-6">
-                    <label htmlFor="imageUrl3" className="block text-gray-700 text-sm font-bold mb-2">Image URL 3:</label>
-                    <input type="url" id="imageUrl3" className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value={imageUrl3} onChange={(e) => setImageUrl3(e.target.value)} />
-                </div>
-                <div className="flex items-center justify-between">
-                    <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        Add Product
+                    <p className="text-gray-700 mb-2">Download our template to quickly add multiple products.</p>
+                    <button
+                        onClick={handleDownloadTemplate}
+                        className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md"
+                    >
+                        <Download size={18} className="mr-2" /> Download Template (CSV)
                     </button>
                 </div>
-            </form>
+                <div className="mb-6">
+                    <label htmlFor="bulkUploadFile" className="block text-gray-700 text-sm font-bold mb-2">Upload Products CSV:</label>
+                    <input
+                        type="file"
+                        id="bulkUploadFile"
+                        accept=".csv"
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                        onChange={handleFileChange}
+                    />
+                    {selectedFile && <p className="mt-2 text-sm text-gray-600">Selected file: {selectedFile.name}</p>}
+                </div>
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={handleBulkUpload}
+                        className={`bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${!selectedFile ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={!selectedFile}
+                    >
+                        Upload Products
+                    </button>
+                </div>
+            </div>
         </PageContainer>
     );
 };
+
+/**
+ * Placeholder component for the checkout page.
+ * @param {object} props - Component props.
+ * @param {function} props.onNavigate - Function to handle page navigation.
+ */
+const CheckoutPage = ({ onNavigate }) => (
+    <PageContainer title="Checkout" onNavigate={onNavigate}>
+        <p className="text-gray-600">This is the checkout page. Here you would typically enter shipping information and payment details.</p>
+        <p className="mt-4 text-gray-600">For this demo, we're keeping it simple. In a real application, you'd proceed with payment integration here.</p>
+        <div className="mt-6">
+            <button onClick={() => onNavigate('home')} className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700">Complete Purchase (Demo)</button>
+        </div>
+    </PageContainer>
+);
 
 
 // --- Placeholder Pages ---
@@ -1090,10 +1386,30 @@ export default function App() {
 
     /**
      * Handles adding a new product to the global product list.
+     * Generates a new ID for the product.
      * @param {object} newProduct - The product object to add.
      */
     const handleAddProduct = (newProduct) => {
-        setProducts(prevProducts => [...prevProducts, { ...newProduct, id: Math.max(...prevProducts.map(p => p.id), 0) + 1 }]);
+        setProducts(prevProducts => {
+            const newId = prevProducts.length > 0 ? Math.max(...prevProducts.map(p => p.id)) + 1 : 1;
+            return [...prevProducts, { ...newProduct, id: newId }];
+        });
+    };
+
+    /**
+     * Handles adding multiple new products to the global product list (bulk upload).
+     * Generates new unique IDs for all products in the bulk array.
+     * @param {Array<object>} newProductsArray - An array of new product objects to add.
+     */
+    const handleAddProductsBulk = (newProductsArray) => {
+        setProducts(prevProducts => {
+            let currentMaxId = prevProducts.length > 0 ? Math.max(...prevProducts.map(p => p.id)) : 0;
+            const productsWithIds = newProductsArray.map(product => {
+                currentMaxId++;
+                return { ...product, id: currentMaxId };
+            });
+            return [...prevProducts, ...productsWithIds];
+        });
     };
 
     /**
@@ -1158,7 +1474,7 @@ export default function App() {
             return <LoginPage onLogin={login} onNavigate={navigate} setNotification={showAppNotification} />;
         }
 
-        // Redirect if trying to access an admin route and not an admin
+        // Redirect if trying to access an admin route and not an an admin
         if (adminRoutes.includes(page) && (!isLoggedIn || !user?.isAdmin)) {
             showAppNotification("Access Denied: You need admin privileges to view this page.");
             return <LoginPage onLogin={login} onNavigate={navigate} setNotification={showAppNotification} />;
@@ -1199,7 +1515,9 @@ export default function App() {
             case 'login':
                 return <LoginPage onLogin={login} onNavigate={navigate} setNotification={showAppNotification} />;
             case 'admin':
-                return <AdminPage onNavigate={navigate} onAddProduct={handleAddProduct} setNotification={showAppNotification} />;
+                return <AdminPage onNavigate={navigate} onAddProduct={handleAddProduct} onAddProductsBulk={handleAddProductsBulk} setNotification={showAppNotification} />;
+            case 'checkout':
+                return <CheckoutPage onNavigate={navigate} />;
             case 'new-arrivals':
                 return <NewArrivalsPage onNavigate={navigate} />;
             case 'about':
